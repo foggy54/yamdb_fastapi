@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from models import models
 from models.database import get_session
 from serializers.user import Roles, UserSerializerInput
+from services.utils import get_hashed_password
 
 
 class UserService:
@@ -17,9 +18,16 @@ class UserService:
             query = query.filter_by(role=roles)
         users = query.all()
         return users
-    
+
     def create(self, user_data: UserSerializerInput) -> models.User:
-        user = models.User(**user_data.dict())
+
+        user_data = user_data.dict()
+        password = user_data.pop('password')
+        user_data['hashed_password'] = get_hashed_password(password)
+        user = models.User(**user_data)        
         self.session.add(user)
         self.session.commit()
+        print(user.__dict__)
+        #user.__dict__.pop('hashed_password')
+        user.__dict__['password'] = 'hided'
         return user
