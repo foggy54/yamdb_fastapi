@@ -9,21 +9,38 @@ class Roles(str, Enum):
     ADMIN = 'admin'
 
 
-class UserSerializerInput(BaseModel):
+class UserBase(BaseModel):
     username: str
     first_name: str
     last_name: str
     email: str
+
+
+class UserSerializerInput(UserBase):
     password: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserSerializer(UserBase):
+    id: int
     role: Roles
 
     class Config:
         orm_mode = True
 
 
-class UserSerializer(UserSerializerInput):
-    id: int
-    hashed_password: Optional[str]
+class TokenRequest(BaseModel):
+    username: str
+    password: str
 
-    class Config:
-        orm_mode = True
+
+class TokenSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+
+
+class TokenPayload(BaseModel):
+    exp: int
+    sub: str

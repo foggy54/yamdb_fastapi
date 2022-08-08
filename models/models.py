@@ -1,14 +1,31 @@
 import asyncio
 from datetime import datetime
+from email.policy import default
 
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, MetaData,
-                        Numeric, SmallInteger, String, Table, Text,
-                        create_engine)
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    MetaData,
+    Numeric,
+    SmallInteger,
+    String,
+    Table,
+    Text,
+    create_engine,
+)
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.future import select
-from sqlalchemy.orm import (backref, relation, relationship, scoped_session,
-                            sessionmaker, validates)
+from sqlalchemy.orm import (
+    backref,
+    relation,
+    relationship,
+    scoped_session,
+    sessionmaker,
+    validates,
+)
 
 from .database import engine, Session
 
@@ -18,7 +35,7 @@ from .database import engine, Session
 # )
 
 Base = declarative_base()
-#Base.query = Session.query_property()
+# Base.query = Session.query_property()
 
 
 def init_db():
@@ -39,7 +56,7 @@ class User(Base):
     last_name = Column(String(MAX_LENGTH_SHORT), nullable=True)
     hashed_password = Column(String(MAX_LENGTH_LONG), nullable=True)
     email = Column(String(MAX_LENGTH_LONG), nullable=True)
-    role = Column(String(MAX_LENGTH_SHORT), nullable=False)
+    role = Column(String(MAX_LENGTH_SHORT), nullable=False, default='user')
 
 
 class Category(Base):
