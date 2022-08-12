@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 
 class Roles(str, Enum):
@@ -26,6 +26,15 @@ class UserSerializerInput(UserBase):
 class UserSerializer(UserBase):
     id: int
     role: Roles
+
+    class Config:
+        orm_mode = True
+
+
+class UserPatchInput(BaseModel):
+    first_name: Union[str, None] = None
+    last_name: Union[str, None] = None
+    password: Union[str, None] = None
 
     class Config:
         orm_mode = True
