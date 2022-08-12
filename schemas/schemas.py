@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from enum import Enum
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 
 class Category(BaseModel):
@@ -19,9 +19,12 @@ class TitleBase(BaseModel):
     year: int
     description: Optional[str] = None
     category: Union[Category, None] = None
-
+    
     class Config:
         orm_mode = True
+        
+class Title(TitleBase):
+    rating: Union[float, None]
 
 
 class ReviewBase(BaseModel):

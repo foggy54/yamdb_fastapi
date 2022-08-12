@@ -1,7 +1,7 @@
-from turtle import update
 from typing import List, Optional, Union, Any
 from datetime import datetime
 from unicodedata import category
+from sqlalchemy.sql import func
 
 from fastapi import Depends, FastAPI, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -45,7 +45,22 @@ class TitleService:
                 detail="Access is forbidden",
             )
         query = self.session.query(models.Title).all()
-        return query
+        response = []
+        for title in query:
+            dic = jsonable_encoder(title)
+            rating = (
+                self.session.query(
+                    func.avg(models.Review.score).label('rating')
+                )
+                .filter(models.Review.title_id == title.id)
+                .scalar()
+            )
+            if rating is not None:
+                dic.update({'rating': round(rating, 2)})
+            else:
+                dic.update({'rating': None})
+            response.append(dic)
+        return response
 
     def get_title_by_id(self, user: models.User, title_id: int):
         if UserPermissions.admin_or_moderator_access(user):
@@ -58,7 +73,15 @@ class TitleService:
             .where(models.Title.id == title_id)
             .first()
         )
-        return query
+        rating = (
+            self.session.query(func.avg(models.Review.score).label('rating'))
+            .filter(models.Review.title_id == title_id)
+            .scalar()
+        )
+
+        response = jsonable_encoder(query)
+        response.update({'rating': round(rating, 2)})
+        return response
 
     def create_title(self, data: TitleBase, user: models.User) -> models.Title:
         if UserPermissions.admin_or_moderator_access(user):

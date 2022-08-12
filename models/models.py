@@ -87,6 +87,16 @@ class Title(Base):
     description = Column(String(500), nullable=True)
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship("Category", backref="titles")
+    
+    @property
+    def rating(self):
+        rating = self.reviews.aggregate('score')
+        if rating:
+            return (
+                round(rating)
+                if isinstance(rating, int)
+                else float(f'{rating:.2f}')
+            )
 
 
 class Review(Base):
@@ -104,11 +114,11 @@ class Review(Base):
     score = Column(SmallInteger)
     pub_date = Column(DateTime, default=datetime.now)
 
-    @validates('score')
-    def validate_score(self, value):
-        if value < 1 or value > 10:
-            raise ValueError("score must be in interval from 1 to 10")
-        return value
+    # @validates('score')
+    # def validate_score(value):
+    #     if value < 1 or value > 10:
+    #         raise ValueError("score must be in interval from 1 to 10")
+    #     return value
 
 
 class Comment(Base):

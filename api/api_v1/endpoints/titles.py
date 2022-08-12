@@ -2,13 +2,14 @@ from typing import List, Optional, Union
 
 
 from crud_service.crud_titles import TitleService
+from crud_service.crud_reviews import ReviewService
 
 # from services.crud_service import CategoryService, UserService, TitleService
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.responses import ORJSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from models.models import User
-from schemas.schemas import Category, TitleBase
+from schemas.schemas import Category, Review, ReviewBase, TitleBase, Title
 from schemas.user import (
     Roles,
     TokenRequest,
@@ -25,7 +26,7 @@ router = APIRouter()
 @router.get(
     '/',
     summary="Get information about titles.",
-    response_model=List[TitleBase],
+    response_model=List[Title],
 )
 def get_titles(
     user: UserSerializer = Depends(get_current_user),
@@ -37,7 +38,7 @@ def get_titles(
 @router.get(
     '/{title_id}',
     summary="Get title by id.",
-    response_model=TitleBase,
+    response_model=Title,
 )
 def get_title_by_id(
     title_id: int,
@@ -83,3 +84,45 @@ def delete_title(
 ):
     response.status_code = status.HTTP_204_NO_CONTENT
     return service.delete_title_by_id(user, title_id)
+
+
+@router.get(
+    "/{title_id}/reviews/{review_id}/",
+    summary="Get review by id.",
+    response_model=Review,
+)
+def get_review(
+    title_id: int,
+    review_id: int,
+    user: UserSerializer = Depends(get_current_user),
+    service: ReviewService = Depends(),
+):
+    return service.get_review(title_id, review_id, user)
+
+
+@router.get(
+    "/{title_id}/reviews/",
+    summary="Get all reviews for selected title.",
+    response_model=List[Review],
+)
+def get_multi(
+    title_id: int,
+    user: UserSerializer = Depends(get_current_user),
+    service: ReviewService = Depends(),
+):
+    return service.get_multi(title_id, user)
+
+
+@router.post(
+    '/{title_id}/reviews',
+    summary="Post review.",
+    response_model=Review,
+    tags=["reviews"],
+)
+def create_review(
+    title_id: int,
+    data: ReviewBase,
+    user: UserSerializer = Depends(get_current_user),
+    service: ReviewService = Depends(),
+):
+    return service.create_review(title_id, data, user)
