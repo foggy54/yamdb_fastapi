@@ -84,9 +84,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserSerializer:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user: UserSerializer = (
-        session.get(models.User, token_data.id)
-    )
+    user: UserSerializer = session.get(models.User, token_data.id)
 
     if user is None:
         raise HTTPException(
@@ -97,4 +95,47 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserSerializer:
     return user
 
 
-# def get_allowed_user(security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)) ->models.User:
+def get_allowed_user(
+    security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)
+) -> models.User:
+    if security_scopes.scopes:
+        authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+    else:
+        authenticate_value = "Bearer"
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": authenticate_value},
+    )
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+
+        if payload.get("id") is None:
+            raise credentials_exception
+        token_data = TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    user: UserSerializer = session.get(models.User, token_data.id)
+    
+    if not user:
+        raise credentials_exception
+    if security_scopes.scopes and not token_data.role:
+        raise HTTPException(
+            status_code=401,
+            detail="Not enough permissions",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
+    if (
+        security_scopes.scopes
+        and token_data.role not in security_scopes.scopes
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Not enough permissions",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
+    return user

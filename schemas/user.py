@@ -53,6 +53,5 @@ class TokenSchema(BaseModel):
 
 class TokenPayload(BaseModel):
     id: int
-    username: str
     role: str
     exp: int

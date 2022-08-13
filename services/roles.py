@@ -4,23 +4,23 @@ class Role:
     """
 
     GUEST = {
-        "name": "GUEST",
+        "name": "guest",
         "description": "A Guest Account",
     }
-    ACCOUNT_ADMIN = {
-        "name": "ACCOUNT_ADMIN",
+    USER = {
+        "name": "user",
         "description": "Primary Administrator/Superuser For an Account",
     }
 
-    ACCOUNT_MANAGER = {
-        "name": "ACCOUNT_MANAGER",
+    MODERATOR = {
+        "name": "moiderator",
         "description": "Day to Day Administrator of Events For an Account",
     }
     ADMIN = {
-        "name": "ADMIN",
+        "name": "admin",
         "description": "Admin of Application Ecosystem",
     }
     SUPER_ADMIN = {
-        "name": "SUPER_ADMIN",
+        "name": "super_admin",
         "description": "Super Administrator of Application Ecosystem",
     }

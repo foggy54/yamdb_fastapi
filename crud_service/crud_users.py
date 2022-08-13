@@ -29,11 +29,6 @@ class UserService:
         user: models.User,
         roles: Optional[Roles] = None,
     ) -> List[models.User]:
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         query = self.session.query(models.User)
         if roles:
             query = query.filter_by(role=roles)
@@ -176,7 +171,6 @@ class TokenService:
 
         token_payload = {
             "id": str(user.id),
-            "username": user.username,
             "role": role,
         }
         return {
