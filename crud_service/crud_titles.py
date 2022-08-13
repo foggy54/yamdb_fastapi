@@ -39,11 +39,6 @@ class TitleService:
         self.session = session
 
     def get_titles(self, user: models.User):
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         query = self.session.query(models.Title).all()
         response = []
         for title in query:
@@ -63,11 +58,6 @@ class TitleService:
         return response
 
     def get_title_by_id(self, user: models.User, title_id: int):
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         query = (
             self.session.query(models.Title)
             .where(models.Title.id == title_id)
@@ -84,11 +74,6 @@ class TitleService:
         return response
 
     def create_title(self, data: TitleBase, user: models.User) -> models.Title:
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         data = data.dict()
         name = data.get('name')
         title = (
@@ -123,11 +108,6 @@ class TitleService:
     def edit_title(
         self, data: TitleBase, user: models.User, title_id: int
     ) -> models.Title:
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         title = self.session.get(models.Title, title_id)
         if not title:
             raise HTTPException(
@@ -140,7 +120,7 @@ class TitleService:
                 self.session.query(models.Category)
                 .where(models.Category.name == category.get('name'))
                 .first()
-            )            
+            )
             if not category:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -155,11 +135,6 @@ class TitleService:
         return title
 
     def delete_title_by_id(self, user: models.User, title_id: int):
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         query = (
             self.session.query(models.Title)
             .where(models.Title.id == title_id)

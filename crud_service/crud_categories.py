@@ -23,11 +23,6 @@ class CategoryService:
     def create_category(
         self, data: Category, user: models.User
     ) -> models.Category:
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         data = data.dict()
         name = data.get('name')
         slug = data.get('slug')

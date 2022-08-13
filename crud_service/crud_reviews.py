@@ -35,12 +35,6 @@ class ReviewService:
         self.session = session
 
     def get_review(self, title_id: int, review_id: int, user: models.User):
-        if UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
-
         query = (
             self.session.query(models.Review)
             .filter(

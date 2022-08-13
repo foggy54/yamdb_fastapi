@@ -36,11 +36,6 @@ class UserService:
         return users
 
     def get_user(self, user: models.User, username: str):
-        if not UserPermissions.admin_or_moderator_access(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access is forbidden",
-            )
         query = (
             self.session.query(models.User)
             .filter(models.User.username == username)
@@ -100,32 +95,6 @@ class UserService:
         )
         self.session.commit()
         return user
-
-    def issue_token(self, form_data: TokenRequest):
-        user = (
-            self.session.query(models.User)
-            .filter(
-                models.User.username == form_data.username,
-            )
-            .first()
-        )
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Incorrect email or password",
-            )
-        hashed_pass = user.hashed_password
-        if not verify_password(form_data.password, hashed_pass):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Incorrect email or password",
-            )
-        return {
-            "access_token": create_access_token(
-                subject=user.id, role=user.role
-            ),
-            "refresh_token": create_refresh_token(user.username),
-        }
 
     def validate_user_fields(self, user_data: UserSerializerInput) -> bool:
         return not (

@@ -66,7 +66,10 @@ def edit_self(
 )
 def get_user_by_username(
     username: str,
-    user: UserSerializer = Depends(get_current_user),
+    user: User = Security(
+        get_allowed_user,
+        scopes=[Role.ADMIN['name'], Role.MODERATOR['name']],
+    ),
     service: UserService = Depends(),
 ):
     return service.get_user(user, username)
