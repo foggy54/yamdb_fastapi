@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 from crud_service.crud_categories import CategoryService
-from crud_service.crud_users import UserService
+from crud_service.crud_users import TokenService, UserService
 from crud_service.crud_titles import TitleService
 
 # from services.crud_service import CategoryService, UserService, TitleService
@@ -40,6 +40,6 @@ def create_user(
 )
 def create_token(
     form_data: TokenRequest,
-    service: UserService = Depends(),
+    service: TokenService = Depends(),
 ):
-    return service.issue_token(form_data)
+    return service.login_access_token(form_data)

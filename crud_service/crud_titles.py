@@ -128,37 +128,30 @@ class TitleService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access is forbidden",
             )
-        data = data.dict()
-        data = {key: value for key, value in data.items() if value is not None}
-        title = self.session.query(models.Title).filter(
-            models.Title.id == title_id
-        )
-        if data.get('category') is not None:
+        title = self.session.get(models.Title, title_id)
+        if not title:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No such title."
+            )
+        data = data.dict(exclude_unset=True)
+        if data.get('category'):
             category = data.pop('category')
             category = (
                 self.session.query(models.Category)
                 .where(models.Category.name == category.get('name'))
                 .first()
-            )
-            if category is None:
+            )            
+            if not category:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="No such Category",
                 )
             data['category_id'] = category.id
-        title = (
-            update(models.Title)
-            .where(models.Title.id == title_id)
-            .values(**data)
-            .execution_options(synchronize_session=False)
-        )
-        self.session.execute(title)
-        title = (
-            self.session.query(models.Title)
-            .filter(models.Title.id == title_id)
-            .first()
-        )
+        for key, value in data.items():
+            setattr(title, key, value)
+        self.session.add(title)
         self.session.commit()
+        self.session.refresh(title)
         return title
 
     def delete_title_by_id(self, user: models.User, title_id: int):

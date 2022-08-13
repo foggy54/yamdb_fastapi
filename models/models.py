@@ -87,16 +87,6 @@ class Title(Base):
     description = Column(String(500), nullable=True)
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship("Category", backref="titles")
-    
-    @property
-    def rating(self):
-        rating = self.reviews.aggregate('score')
-        if rating:
-            return (
-                round(rating)
-                if isinstance(rating, int)
-                else float(f'{rating:.2f}')
-            )
 
 
 class Review(Base):

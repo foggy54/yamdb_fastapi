@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -141,3 +141,45 @@ class UserService:
         self, user_data: UserSerializerInput
     ) -> bool:
         return str(user_data.username).lower() == 'me'
+
+
+class TokenService:
+    def __init__(self, session: Session = Depends(get_session)):
+        self.session = session
+
+    def login_access_token(self, form_data: TokenRequest) -> Any:
+        """
+        OAuth2 compatible token login, get an access token for future requests
+        """
+        user: models.User = (
+            self.session.query(models.User)
+            .filter(
+                models.User.username == form_data.username,
+            )
+            .first()
+        )
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect email or password",
+            )
+        hashed_pass = user.hashed_password
+        if not verify_password(form_data.password, hashed_pass):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect email or password",
+            )
+        if not user.role:
+            role = "GUEST"
+        else:
+            role = user.role
+
+        token_payload = {
+            "id": str(user.id),
+            "username": user.username,
+            "role": role,
+        }
+        return {
+            "access_token": create_access_token(token_payload),
+            "token_type": "bearer",
+        }

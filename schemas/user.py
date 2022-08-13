@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
 from typing import Optional, Union
+from pydantic.networks import EmailStr
 
 
 class Roles(str, Enum):
@@ -47,9 +48,11 @@ class TokenRequest(BaseModel):
 
 class TokenSchema(BaseModel):
     access_token: str
-    refresh_token: str
+    token_type: str
 
 
 class TokenPayload(BaseModel):
+    id: int
+    username: str
+    role: str
     exp: int
-    sub: str

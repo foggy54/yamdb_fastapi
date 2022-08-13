@@ -1,9 +1,9 @@
 import os
 from datetime import datetime, timedelta
-from typing import Any, Union
+from typing import Any, Dict, Union
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jose import jwt
 from models import models
 from models.database import engine
@@ -31,9 +31,7 @@ def verify_password(password: str, hashed_pass: str) -> bool:
     return password_context.verify(password, hashed_pass)
 
 
-def create_access_token(
-    subject: Union[str, Any], role: Union[str, Any], expires_delta: int = None
-) -> str:
+def create_access_token(token_payload: Any, expires_delta: int = None) -> str:
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
@@ -41,8 +39,9 @@ def create_access_token(
             minutes=ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-    to_encode = {"exp": expires_delta, "sub": str(subject), "role": str(role)}
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
+    token_payload.update({"exp": expires_delta})
+
+    encoded_jwt = jwt.encode(token_payload, JWT_SECRET_KEY, ALGORITHM)
     return encoded_jwt
 
 
@@ -85,10 +84,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserSerializer:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user: Union[dict[str, Any], None] = (
-        session.query(models.User)
-        .filter(models.User.id == token_data.sub)
-        .first()
+    user: UserSerializer = (
+        session.get(models.User, token_data.id)
     )
 
     if user is None:
@@ -98,3 +95,6 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserSerializer:
         )
 
     return user
+
+
+# def get_allowed_user(security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)) ->models.User:
