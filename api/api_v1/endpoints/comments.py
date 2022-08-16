@@ -9,7 +9,15 @@ from fastapi import APIRouter, Depends, Response, status, Security
 from fastapi.responses import ORJSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from models.models import User
-from schemas.schemas import Category, Review, ReviewBase, TitleBase, Title, CommentIn, CommentOut
+from schemas.schemas import (
+    Category,
+    Review,
+    ReviewBase,
+    TitleBase,
+    Title,
+    CommentIn,
+    CommentOut,
+)
 from schemas.user import (
     Roles,
     TokenRequest,
@@ -24,8 +32,9 @@ from services.roles import Role
 
 comments_router = APIRouter()
 
+
 @comments_router.get(
-    '/comments',
+    '/',
     summary="Get all comments for the review.",
     response_model=List[CommentOut],
 )
@@ -40,17 +49,48 @@ def get_comments(
 
 
 @comments_router.post(
-    '/comments',
+    '/',
     summary="Create comment to the review.",
     response_model=CommentOut,
 )
 def create_comment(
-    review_id:int,
+    review_id: int,
     data_in: CommentIn,
     user: User = Security(
         get_allowed_user,
-        scopes=[Role.ADMIN['name'], Role.MODERATOR['name']],
+        scopes=[Role.ADMIN['name'], Role.MODERATOR['name'], Role.USER['name']],
     ),
     service: CommentService = Depends(),
 ):
     return service.create(obj_in=data_in, user=user, review_id=review_id)
+
+
+@comments_router.put(
+    "/{comment_id}",
+    summary="Edit selected comment",
+)
+def update(
+    comment_id: int,
+    data_in: CommentIn,
+    user: User = Security(
+        get_allowed_user,
+        scopes=[Role.ADMIN['name'], Role.MODERATOR['name'], Role.USER['name']],
+    ),
+    service: CommentService = Depends(),
+):
+    return service.update(data_in, user, comment_id)
+
+
+@comments_router.delete(
+    '/{comment_id}',
+    summary='Delete selected comment.',
+)
+def delete_comment(
+    comment_id: int,
+    user: User = Security(
+        get_allowed_user,
+        scopes=[Role.ADMIN['name'], Role.MODERATOR['name'], Role.USER['name']],
+    ),
+    service: CommentService = Depends(),
+):
+    return service.remove(id=comment_id)

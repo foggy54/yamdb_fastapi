@@ -9,7 +9,14 @@ from fastapi import APIRouter, Depends, Response, status, Security
 from fastapi.responses import ORJSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from models.models import User
-from schemas.schemas import Category, CommentOut, Review, ReviewBase, TitleBase, Title
+from schemas.schemas import (
+    Category,
+    CommentOut,
+    Review,
+    ReviewBase,
+    TitleBase,
+    Title,
+)
 from schemas.user import (
     Roles,
     TokenRequest,
@@ -24,7 +31,11 @@ from services.roles import Role
 from .comments import comments_router
 
 reviews_router = APIRouter()
-reviews_router.include_router(comments_router, prefix="/{title_id}/reviews/{review_id}", tags=["comments"])
+reviews_router.include_router(
+    comments_router,
+    prefix="/{title_id}/reviews/{review_id}/comments",
+    tags=["comments"],
+)
 
 
 @reviews_router.get(
@@ -70,3 +81,24 @@ def create_review(
     service: ReviewService = Depends(),
 ):
     return service.create_review(title_id, data, user)
+
+
+@reviews_router.delete(
+    "/{title_id}/reviews/{review_id}",
+    summary="Delete selected review",
+    response_class=Response,
+)
+def remove(
+    review_id: int,
+    response: Response,
+    user: User = Security(
+        get_allowed_user,
+        scopes=[
+            Role.ADMIN['name'],
+            Role.MODERATOR['name'],
+        ],
+    ),
+    service: ReviewService = Depends(),
+):
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return service.remove(review_id)

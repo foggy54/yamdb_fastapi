@@ -20,6 +20,7 @@ from schemas.user import (
     UserSerializerInput,
 )
 from services.permissions import UserPermissions
+from .crud_base import CRUDBase
 from services.utils import (
     create_access_token,
     create_refresh_token,
@@ -30,16 +31,17 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 
-class ReviewService:
+class ReviewService(CRUDBase[models.Review]):
     def __init__(self, session: Session = Depends(get_session)):
         self.session = session
+        self.model = models.Review
 
     def get_review(self, title_id: int, review_id: int, user: models.User):
         query = (
-            self.session.query(models.Review)
+            self.session.query(self.model)
             .filter(
-                models.Review.title_id == title_id,
-                models.Review.id == review_id,
+                self.model.title_id == title_id,
+                self.model.id == review_id,
             )
             .first()
         )
@@ -63,8 +65,8 @@ class ReviewService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Title not found",
             )
-        query = self.session.query(models.Review).filter(
-            models.Review.title_id == title_id
+        query = self.session.query(self.model).filter(
+            self.model.title_id == title_id
         )
         if query is None:
             raise HTTPException(
@@ -94,11 +96,10 @@ class ReviewService:
         data = jsonable_encoder(data)
         data['author_id'] = user.id
         data['title_id'] = title_id
-        review = models.Review(**data)
+        review = self.model(**data)
         self.session.add(review)
         self.session.commit()
         self.session.refresh(review)
         response = jsonable_encoder(review)
         review = Review(author=user.username, **response)
-
         return review

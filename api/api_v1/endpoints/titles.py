@@ -28,8 +28,6 @@ router = APIRouter()
 router.include_router(reviews_router, tags=["reviews"])
 
 
-
-
 @router.get(
     '/',
     summary="Get information about titles.",
@@ -103,6 +101,3 @@ def delete_title(
 ):
     response.status_code = status.HTTP_204_NO_CONTENT
     return service.delete_title_by_id(user, title_id)
-
-
-

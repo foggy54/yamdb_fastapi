@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 from models import models
 from models.database import get_session
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import delete, select, update
 
 from schemas.schemas import CommentIn, CommentOut
+from services.permissions import UserPermissions
 from services.utils import (
     create_access_token,
     create_refresh_token,
@@ -17,13 +19,13 @@ from services.utils import (
 from .crud_base import CRUDBase
 
 
-class CommentService:
+class CommentService(CRUDBase[models.Comment]):
     def __init__(self, session: Session = Depends(get_session)):
         self.session = session
         self.model = models.Comment
 
     def create(
-        self, *, obj_in: CommentIn, user: models.User, review_id: int
+        self, obj_in: CommentIn, user: models.User, review_id: int
     ) -> models.Comment:
         review = (
             self.session.query(self.model)
@@ -58,6 +60,35 @@ class CommentService:
         response = []
         for comment in query:
             comment_dic = jsonable_encoder(comment)
-            comment_dic = CommentOut(author=comment.author.username, **comment_dic)
+            comment_dic = CommentOut(
+                author=comment.author.username, **comment_dic
+            )
             response.append(comment_dic)
+        return response
+
+    def update(
+        self, obj_in: CommentIn, user: models.User, comment_id: int
+    ) -> CommentOut:
+        query = select(self.model).where(self.model.id == comment_id)
+        comment = self.session.execute(query).scalars().first()
+        if comment is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No such comment.",
+            )
+        if UserPermissions.admin_or_moderator_or_self_access(
+            user, comment.author
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not allowed.",
+            )
+        data = obj_in.dict(exclude_unset=True)
+        query = update(self.model).where(self.model.id == comment_id).values(**data)
+        self.session.execute(query)
+        self.session.commit()
+        query = select(self.model).where(self.model.id == comment_id)
+        comment = self.session.execute(query).scalars().first()
+        comment_dic = jsonable_encoder(comment)
+        response = CommentOut(author=comment.author.username, **comment_dic)
         return response
