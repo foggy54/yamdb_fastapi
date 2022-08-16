@@ -66,7 +66,7 @@ def edit_self(
 )
 def get_user_by_username(
     username: str,
-    user: User = Security(
+        user: User = Security(
         get_allowed_user,
         scopes=[Role.ADMIN['name'], Role.MODERATOR['name']],
     ),

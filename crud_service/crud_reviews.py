@@ -43,6 +43,11 @@ class ReviewService:
             )
             .first()
         )
+        if query is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No reviews found",
+            )
         response = jsonable_encoder(query)
         response = Review(author=query.author.username, **response)
         return response
@@ -61,6 +66,11 @@ class ReviewService:
         query = self.session.query(models.Review).filter(
             models.Review.title_id == title_id
         )
+        if query is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Review is not found",
+            )
         response = []
         for review in query:
             review_dic = jsonable_encoder(review)

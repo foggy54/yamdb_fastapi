@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import update
 from models import models
 
+
 from models.database import get_session
 from pydantic import ValidationError
 from schemas.user import (
@@ -70,7 +71,8 @@ class TitleService:
         )
 
         response = jsonable_encoder(query)
-        response.update({'rating': round(rating, 2)})
+        if rating:
+            response.update({'rating': round(rating, 2)})
         return response
 
     def create_title(self, data: TitleBase, user: models.User) -> models.Title:
@@ -98,7 +100,6 @@ class TitleService:
                 detail="No such Category",
             )
         data['category'] = category
-        print(data)
         title = models.Title(**data)
         self.session.add(title)
         self.session.commit()

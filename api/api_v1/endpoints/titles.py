@@ -20,8 +20,14 @@ from schemas.user import (
 )
 from services.utils import get_current_user, get_allowed_user
 from services.roles import Role
+from .comments import comments_router
+from .reviews import reviews_router
+
 
 router = APIRouter()
+router.include_router(reviews_router, tags=["reviews"])
+
+
 
 
 @router.get(
@@ -99,46 +105,4 @@ def delete_title(
     return service.delete_title_by_id(user, title_id)
 
 
-@router.get(
-    "/{title_id}/reviews/{review_id}/",
-    summary="Get review by id.",
-    response_model=Review,
-)
-def get_review(
-    title_id: int,
-    review_id: int,
-    user: UserSerializer = Depends(get_current_user),
-    service: ReviewService = Depends(),
-):
-    return service.get_review(title_id, review_id, user)
 
-
-@router.get(
-    "/{title_id}/reviews/",
-    summary="Get all reviews for selected title.",
-    response_model=List[Review],
-)
-def get_multi(
-    title_id: int,
-    user: UserSerializer = Depends(get_current_user),
-    service: ReviewService = Depends(),
-):
-    return service.get_multi(title_id, user)
-
-
-@router.post(
-    '/{title_id}/reviews',
-    summary="Post review.",
-    response_model=Review,
-    tags=["reviews"],
-)
-def create_review(
-    title_id: int,
-    data: ReviewBase,
-    user: User = Security(
-        get_allowed_user,
-        scopes=[Role.ADMIN['name'], Role.MODERATOR['name'], Role.USER["name"]],
-    ),
-    service: ReviewService = Depends(),
-):
-    return service.create_review(title_id, data, user)
