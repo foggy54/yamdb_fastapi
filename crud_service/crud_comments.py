@@ -1,21 +1,12 @@
-from typing import Any, List, Optional
-
 from fastapi import Depends, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from models import models
 from models.database import get_session
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy import delete, select, update
-
 from schemas.schemas import CommentIn, CommentOut
 from services.permissions import UserPermissions
-from services.utils import (
-    create_access_token,
-    create_refresh_token,
-    get_hashed_password,
-    verify_password,
-)
 from .crud_base import CRUDBase
 
 

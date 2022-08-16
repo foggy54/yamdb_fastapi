@@ -1,21 +1,11 @@
-from typing import List, Optional, Union, Any
-from datetime import datetime
-from unicodedata import category
-
-from fastapi import Depends, FastAPI, HTTPException, status, Response
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
-from sqlalchemy.orm import Session
-from sqlalchemy import update
-from models import models
-
-from models.database import get_session
-
-from schemas.schemas import Category, TitleBase
-from services.permissions import UserPermissions
-from fastapi.encoders import jsonable_encoder
-from .crud_base import CRUDBase
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import delete
+from sqlalchemy.orm import Session
+
+from models import models
+from models.database import get_session
+from schemas.schemas import Category
+from .crud_base import CRUDBase
 
 
 class CategoryService(CRUDBase[models.Category]):

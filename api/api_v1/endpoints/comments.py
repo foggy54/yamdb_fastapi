@@ -1,34 +1,18 @@
-from typing import List, Optional, Union
+from typing import List
 
+from fastapi import APIRouter, Depends, Security
 
-from crud_service.crud_titles import TitleService
-from crud_service.crud_reviews import ReviewService
-
-# from services.crud_service import CategoryService, UserService, TitleService
-from fastapi import APIRouter, Depends, Response, status, Security
-from fastapi.responses import ORJSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from crud_service.crud_comments import CommentService
 from models.models import User
 from schemas.schemas import (
-    Category,
-    Review,
-    ReviewBase,
-    TitleBase,
-    Title,
     CommentIn,
     CommentOut,
 )
 from schemas.user import (
-    Roles,
-    TokenRequest,
-    TokenSchema,
-    UserPatchInput,
     UserSerializer,
-    UserSerializerInput,
 )
-from crud_service.crud_comments import CommentService
-from services.utils import get_current_user, get_allowed_user
 from services.roles import Role
+from services.utils import get_current_user, get_allowed_user
 
 comments_router = APIRouter()
 

@@ -1,7 +1,7 @@
-from pydantic import BaseModel
 from enum import Enum
-from typing import Optional, Union
-from pydantic.networks import EmailStr
+from typing import Union
+
+from pydantic import BaseModel
 
 
 class Roles(str, Enum):

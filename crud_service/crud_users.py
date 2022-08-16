@@ -2,21 +2,17 @@ from typing import Any, List, Optional
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from fastapi.encoders import jsonable_encoder
 
 from models import models
 from models.database import get_session
-from models.async_db import get_db
 from schemas.user import (
     Roles,
     TokenRequest,
     UserPatchInput,
     UserSerializerInput,
 )
-from services.permissions import UserPermissions
 from services.utils import (
     create_access_token,
-    create_refresh_token,
     get_hashed_password,
     verify_password,
 )

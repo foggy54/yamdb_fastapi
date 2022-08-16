@@ -1,15 +1,11 @@
-import os
 from datetime import datetime, timedelta
-from typing import Any, Dict, Union
+from typing import Any, Union
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jose import jwt
-from models import models
-from models.database import engine
 from passlib.context import CryptContext
 from pydantic import ValidationError
-from schemas.user import TokenPayload, UserSerializer
 from sqlalchemy.orm import Session
 
 from config import (
@@ -19,6 +15,9 @@ from config import (
     JWT_SECRET_KEY,
     REFRESH_TOKEN_EXPIRE_MINUTES,
 )
+from models import models
+from models.database import engine
+from schemas.user import TokenPayload, UserSerializer
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

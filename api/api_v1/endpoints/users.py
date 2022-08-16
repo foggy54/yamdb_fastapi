@@ -1,25 +1,16 @@
-from typing import List, Optional, Union
+from typing import List
 
-from crud_service.crud_categories import CategoryService
+from fastapi import APIRouter, Depends, Security
+
 from crud_service.crud_users import UserService
-from crud_service.crud_titles import TitleService
-
-# from services.crud_service import CategoryService, UserService, TitleService
-from fastapi import APIRouter, Depends, Response, status, Security
-from fastapi.responses import ORJSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
 from models.models import User
-from schemas.schemas import Category, TitleBase
 from schemas.user import (
     Roles,
-    TokenRequest,
-    TokenSchema,
     UserPatchInput,
     UserSerializer,
-    UserSerializerInput,
 )
-from services.utils import get_current_user, get_allowed_user
 from services.roles import Role
+from services.utils import get_current_user, get_allowed_user
 
 router = APIRouter()
 

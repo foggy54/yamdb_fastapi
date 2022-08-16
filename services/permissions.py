@@ -1,22 +1,4 @@
-from typing import List, Optional, Union, Any
-from datetime import datetime
-
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
-from sqlalchemy.orm import Session
 from models import models
-
-from models.database import get_session
-from pydantic import ValidationError
-from schemas.user import (
-    Roles,
-    TokenRequest,
-    TokenSchema,
-    UserSerializer,
-    UserSerializerInput,
-    TokenPayload,
-)
 
 
 class UserPermissions:

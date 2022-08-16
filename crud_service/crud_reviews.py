@@ -1,34 +1,11 @@
-from datetime import datetime
-from typing import Any, List, Optional, Union
-from unicodedata import category
-
-from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi import Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
+from sqlalchemy.orm import Session
+
 from models import models
 from models.database import get_session
-from pydantic import ValidationError
-from schemas.schemas import Category, Review, ReviewBase, TitleBase
-from schemas.user import (
-    Roles,
-    TokenPayload,
-    TokenRequest,
-    TokenSchema,
-    UserPatchInput,
-    UserSerializer,
-    UserSerializerInput,
-)
-from services.permissions import UserPermissions
+from schemas.schemas import Review, ReviewBase
 from .crud_base import CRUDBase
-from services.utils import (
-    create_access_token,
-    create_refresh_token,
-    get_hashed_password,
-    verify_password,
-)
-from sqlalchemy import update
-from sqlalchemy.orm import Session
 
 
 class ReviewService(CRUDBase[models.Review]):

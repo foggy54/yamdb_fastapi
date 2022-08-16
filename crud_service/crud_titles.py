@@ -1,38 +1,11 @@
-from typing import List, Optional, Union, Any
-from datetime import datetime
-from unicodedata import category
+from fastapi import Depends, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
-from fastapi import Depends, FastAPI, HTTPException, status, Response
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
-from sqlalchemy.orm import Session
-from sqlalchemy import update
 from models import models
-
-
 from models.database import get_session
-from pydantic import ValidationError
-from schemas.user import (
-    Roles,
-    TokenRequest,
-    TokenSchema,
-    UserPatchInput,
-    UserSerializer,
-    UserSerializerInput,
-    TokenPayload,
-)
-from schemas.schemas import Category, TitleBase
-from services.permissions import UserPermissions
-from fastapi.encoders import jsonable_encoder
-
-
-from services.utils import (
-    create_access_token,
-    create_refresh_token,
-    get_hashed_password,
-    verify_password,
-)
+from schemas.schemas import TitleBase
 
 
 class TitleService:
