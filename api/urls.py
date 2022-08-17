@@ -1,19 +1,11 @@
-from typing import List, Optional
+from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends
-from serializers.user import UserSerializer, UserSerializerInput, Roles
-from services.logic import UserService
+from api.api_v1.endpoints import categories_genres, login, titles, users
 
-router = APIRouter(prefix='/api')
-
-
-@router.get("/", response_model=List[UserSerializer])
-def get_users(roles: Optional[Roles] = None, service: UserService = Depends()):
-    return service.get_list(roles=roles)
-
-
-@router.post('/', response_model=UserSerializerInput)
-def create_user(
-    user_data: UserSerializerInput, service: UserService = Depends()
-):
-    return service.create(user_data)
+api_router = APIRouter(prefix='/api/v1')
+api_router.include_router(login.router, tags=["login"])
+api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(titles.router, prefix="/titles", tags=["titles"])
+api_router.include_router(
+    categories_genres.router, prefix="/categories", tags=["categories"]
+)

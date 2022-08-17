@@ -1,24 +1,27 @@
-import asyncio
 from datetime import datetime
 
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, MetaData,
-                        Numeric, SmallInteger, String, Table, Text,
-                        create_engine)
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.future import select
-from sqlalchemy.orm import (backref, relation, relationship, scoped_session,
-                            sessionmaker, validates)
+from sqlalchemy.orm import (
+    relationship,
+)
 
-from .database import engine, Session
-
+from .database import engine
 
 # db_session = scoped_session(
 #     sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # )
 
 Base = declarative_base()
-#Base.query = Session.query_property()
+# Base.query = Session.query_property()
 
 
 def init_db():
@@ -39,7 +42,7 @@ class User(Base):
     last_name = Column(String(MAX_LENGTH_SHORT), nullable=True)
     hashed_password = Column(String(MAX_LENGTH_LONG), nullable=True)
     email = Column(String(MAX_LENGTH_LONG), nullable=True)
-    role = Column(String(MAX_LENGTH_SHORT), nullable=False)
+    role = Column(String(MAX_LENGTH_SHORT), nullable=False, default='user')
 
 
 class Category(Base):
@@ -87,11 +90,11 @@ class Review(Base):
     score = Column(SmallInteger)
     pub_date = Column(DateTime, default=datetime.now)
 
-    @validates('score')
-    def validate_score(self, value):
-        if value < 1 or value > 10:
-            raise ValueError("score must be in interval from 1 to 10")
-        return value
+    # @validates('score')
+    # def validate_score(value):
+    #     if value < 1 or value > 10:
+    #         raise ValueError("score must be in interval from 1 to 10")
+    #     return value
 
 
 class Comment(Base):
