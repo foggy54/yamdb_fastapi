@@ -1,6 +1,6 @@
 from typing import Any, Generic, List, Optional, Type, TypeVar
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from models.database import get_session
@@ -33,8 +33,13 @@ class CRUDBase(Generic[ModelType]):
     def get_multi(self, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
         return self.session.query(self.model).offset(skip).limit(limit).all()
 
-    def remove(self, *, id: int) -> ModelType:
+    def remove(self, *, id: int) -> None:
         obj = self.session.query(self.model).get(id)
+        if obj is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Not found.",
+            )
         self.session.delete(obj)
         self.session.commit()
-        return obj
+        return None

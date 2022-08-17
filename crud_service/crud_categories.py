@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from models import models
@@ -34,6 +34,14 @@ class CategoryService(CRUDBase[models.Category]):
         return category
 
     def remove(self, slug: str):
+        category = select(self.model).where(self.model.slug == slug)
+        record = self.session.execute(category)
+        category = record.scalars().first()
+        if category is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Category not found.",
+            )
         query = delete(self.model).where(self.model.slug == slug)
         self.session.execute(query)
         self.session.commit()
